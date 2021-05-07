@@ -2,7 +2,7 @@ use std::{
     convert::TryFrom, convert::TryInto, future::Future, str::FromStr, sync::Arc, thread,
     time::Duration,
 };
-
+use subtle_encoding::base64;
 use anomaly::fail;
 use bech32::{ToBase32, Variant};
 use bitcoin::hashes::hex::ToHex;
@@ -230,7 +230,7 @@ impl CosmosSdkChain {
 
         let mut txraw_buf = Vec::new();
         prost::Message::encode(&tx_raw, &mut txraw_buf).unwrap();
-
+        println!("{}", std::str::from_utf8(base64::encode(&txraw_buf).as_slice()).unwrap());
         crate::time!("TxRAW {:?}", hex::encode(txraw_buf.clone()));
 
         let response = self

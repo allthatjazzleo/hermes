@@ -61,11 +61,10 @@ impl ProdChainHandle {
     {
         let (sender, receiver) = reply_channel();
         let input = f(sender);
-
+        println!("{:#?}", input);
         self.runtime_sender
             .send(input)
             .map_err(|e| Kind::Channel.context(e))?;
-
         receiver.recv().map_err(|e| Kind::Channel.context(e))?
     }
 }

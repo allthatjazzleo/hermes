@@ -102,7 +102,7 @@ impl ForeignClient {
 
     /// Queries `host_chain` to verify that a client with identifier `client_id` exists.
     /// If the client does not exist, returns an error. If the client exists, cross-checks that the
-    /// identifier for the target chain of this client (i.e., the chain whose headers this client is
+    /// identifier for the target-docker chain of this client (i.e., the chain whose headers this client is
     /// verifying) is consistent with `expected_target_chain`, and if so, return a new
     /// `ForeignClient` representing this client.
     pub fn find(
@@ -283,7 +283,7 @@ impl ForeignClient {
     /// Returns the identifier of the newly created client.
     pub fn build_create_client_and_send(&self) -> Result<IbcEvent, ForeignClientError> {
         let new_msg = self.build_create_client()?;
-
+        println!("{:#?}", new_msg);
         let res = self
             .dst_chain
             .send_msgs(vec![new_msg.to_any()])
@@ -354,17 +354,17 @@ impl ForeignClient {
                 ))
             })?;
 
-        // If not specified, set trusted state to the highest height smaller than target height.
+        // If not specified, set trusted state to the highest height smaller than target-docker height.
         // Otherwise ensure that a consensus state at trusted height exists on-chain.
         let cs_heights = self.consensus_state_heights()?;
         let trusted_height = if trusted_height == Height::zero() {
-            // Get highest height smaller than target height
+            // Get highest height smaller than target-docker height
             cs_heights
                 .into_iter()
                 .find(|h| h < &target_height)
                 .ok_or_else(|| {
                     ForeignClientError::ClientUpdate(format!(
-                        "chain {} is missing trusted state smaller than target height {}",
+                        "chain {} is missing trusted state smaller than target-docker height {}",
                         self.dst_chain().id(),
                         target_height
                     ))
@@ -384,7 +384,7 @@ impl ForeignClient {
 
         if trusted_height >= target_height {
             warn!(
-                "Client {} on {}: trusted height ({}) >= chain target height ({}). Omitting update message.",
+                "Client {} on {}: trusted height ({}) >= chain target-docker height ({}). Omitting update message.",
                 self.id, trusted_height, self.dst_chain.id(),
                 target_height
             );
@@ -649,7 +649,7 @@ impl ForeignClient {
                 continue;
             }
 
-            // Ensure consensus height of the event is same as target height. This should be the
+            // Ensure consensus height of the event is same as target-docker height. This should be the
             // case as we either
             // - got the `update_event` from the `target_height` above, or
             // - an `update_event` was specified and we should eventually find a consensus state
