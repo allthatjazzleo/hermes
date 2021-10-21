@@ -33,6 +33,14 @@ pub trait LightClient<C: ChainEndpoint>: Send + Sync {
         client_state: &AnyClientState,
     ) -> Result<Verified<C::Header>, error::Error>;
 
+    /// Fetch and verify a header, and return its minimal supporting set for genesis restart case.
+    fn header_and_minimal_set_for_genesis_restart(
+        &mut self,
+        trusted: ibc::Height,
+        target: ibc::Height,
+        client_state: &AnyClientState,
+    ) -> Result<Verified<C::Header>, error::Error>;
+
     /// Fetch a header from the chain at the given height and verify it.
     fn verify(
         &mut self,

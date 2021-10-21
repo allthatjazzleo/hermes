@@ -69,6 +69,13 @@ pub struct TxUpdateClientCmd {
 
     #[options(help = "the trusted height of the client update", short = "t")]
     trusted_height: Option<u64>,
+
+    #[options(
+        help = "client update for genesis restart (no old blocks)",
+        default = "false",
+        short = "g")
+    ]
+    genesis_restart: bool,
 }
 
 impl Runnable for TxUpdateClientCmd {
@@ -110,9 +117,9 @@ impl Runnable for TxUpdateClientCmd {
         let client = ForeignClient::find(src_chain, dst_chain, &self.dst_client_id)
             .unwrap_or_else(exit_with_unrecoverable_error);
 
-        let res = client
-            .build_update_client_and_send(height, trusted_height)
-            .map_err(Error::foreign_client);
+        let res =  client
+                .build_update_client_and_send(height, trusted_height, self.genesis_restart)
+                .map_err(Error::foreign_client);
 
         match res {
             Ok(events) => Output::success(events).exit(),
