@@ -52,6 +52,19 @@ impl super::LightClient<CosmosSdkChain> for LightClient {
         Ok(Verified { target, supporting })
     }
 
+    fn header_and_minimal_set_for_genesis_restart(
+        &mut self,
+        trusted: ibc::Height,
+        target: ibc::Height,
+        client_state: &AnyClientState,
+    ) -> Result<Verified<TmHeader>, Error> {
+        let trusted_target = target.clone().decrement().unwrap();
+        let Verified { target: target_block, supporting } = self.verify(trusted_target, target, client_state)?;
+        let (mut target, supporting) = self.adjust_headers(trusted_target, target_block, supporting)?;
+        target.trusted_height = trusted;
+        Ok(Verified { target, supporting })
+    }
+
     fn verify(
         &mut self,
         trusted: ibc::Height,

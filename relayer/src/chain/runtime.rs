@@ -235,6 +235,10 @@ where
                             self.build_header(trusted_height, target_height, client_state, reply_to)?
                         }
 
+                        Ok(ChainRequest::BuildHeaderForGenesisRestart { trusted_height, target_height, client_state, reply_to }) => {
+                            self.build_header_for_genesis_restart(trusted_height, target_height, client_state, reply_to)?
+                        }
+
                         Ok(ChainRequest::BuildClientState { height, dst_config, reply_to }) => {
                             self.build_client_state(height, dst_config, reply_to)?
                         }
@@ -435,6 +439,30 @@ where
         let result = self
             .chain
             .build_header(
+                trusted_height,
+                target_height,
+                &client_state,
+                &mut self.light_client,
+            )
+            .map(|(header, support)| {
+                let header = header.wrap_any();
+                let support = support.into_iter().map(|h| h.wrap_any()).collect();
+                (header, support)
+            });
+
+        reply_to.send(result).map_err(Error::send)
+    }
+
+    fn build_header_for_genesis_restart(
+        &mut self,
+        trusted_height: Height,
+        target_height: Height,
+        client_state: AnyClientState,
+        reply_to: ReplyTo<(AnyHeader, Vec<AnyHeader>)>,
+    ) -> Result<(), Error> {
+        let result = self
+            .chain
+            .build_header_for_genesis_restart(
                 trusted_height,
                 target_height,
                 &client_state,

@@ -597,7 +597,7 @@ impl<DstChain: ChainHandle, SrcChain: ChainHandle> ForeignClient<DstChain, SrcCh
         &self,
         target_height: Height,
     ) -> Result<Vec<Any>, ForeignClientError> {
-        self.build_update_client_with_trusted(target_height, Height::zero())
+        self.build_update_client_with_trusted(target_height, Height::zero(), false)
     }
 
     // Returns a trusted height that is lower than the target height, so
@@ -768,6 +768,7 @@ impl<DstChain: ChainHandle, SrcChain: ChainHandle> ForeignClient<DstChain, SrcCh
         &self,
         target_height: Height,
         trusted_height: Height,
+        genesis_restart: bool,
     ) -> Result<Vec<Any>, ForeignClientError> {
         let latest_height = || {
             self.src_chain().query_latest_height().map_err(|e| {
@@ -811,16 +812,29 @@ impl<DstChain: ChainHandle, SrcChain: ChainHandle> ForeignClient<DstChain, SrcCh
             return Ok(vec![]);
         }
 
-        let (header, support) = self
-            .src_chain()
-            .build_header(trusted_height, target_height, client_state.clone())
-            .map_err(|e| {
-                ForeignClientError::client_update(
-                    self.src_chain.id(),
-                    "failed building header with error".to_string(),
-                    e,
-                )
-            })?;
+        let (header, support) = if genesis_restart {
+            self
+                .src_chain()
+                .build_header_for_genesis_restart(trusted_height, target_height, client_state.clone())
+                .map_err(|e| {
+                    ForeignClientError::client_update(
+                        self.src_chain.id(),
+                        "failed building header with error".to_string(),
+                        e,
+                    )
+                })?
+        }else {
+            self
+                .src_chain()
+                .build_header(trusted_height, target_height, client_state.clone())
+                .map_err(|e| {
+                    ForeignClientError::client_update(
+                        self.src_chain.id(),
+                        "failed building header with error".to_string(),
+                        e,
+                    )
+                })?
+        };
 
         let signer = self.dst_chain().get_signer().map_err(|e| {
             ForeignClientError::client_update(
@@ -871,13 +885,14 @@ impl<DstChain: ChainHandle, SrcChain: ChainHandle> ForeignClient<DstChain, SrcCh
     }
 
     pub fn build_latest_update_client_and_send(&self) -> Result<Vec<IbcEvent>, ForeignClientError> {
-        self.build_update_client_and_send(Height::zero(), Height::zero())
+        self.build_update_client_and_send(Height::zero(), Height::zero(), false)
     }
 
     pub fn build_update_client_and_send(
         &self,
         height: Height,
         trusted_height: Height,
+        genesis_restart: bool,
     ) -> Result<Vec<IbcEvent>, ForeignClientError> {
         let h = if height == Height::zero() {
             self.src_chain.query_latest_height().map_err(|e| {
@@ -891,7 +906,7 @@ impl<DstChain: ChainHandle, SrcChain: ChainHandle> ForeignClient<DstChain, SrcCh
             height
         };
 
-        let new_msgs = self.build_update_client_with_trusted(h, trusted_height)?;
+        let new_msgs = self.build_update_client_with_trusted(h, trusted_height, genesis_restart)?;
         if new_msgs.is_empty() {
             return Err(ForeignClientError::client_already_up_to_date(
                 self.id.clone(),

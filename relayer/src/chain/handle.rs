@@ -150,6 +150,13 @@ pub enum ChainRequest {
         reply_to: ReplyTo<(AnyHeader, Vec<AnyHeader>)>,
     },
 
+    BuildHeaderForGenesisRestart {
+        trusted_height: Height,
+        target_height: Height,
+        client_state: AnyClientState,
+        reply_to: ReplyTo<(AnyHeader, Vec<AnyHeader>)>,
+    },
+
     BuildClientState {
         height: Height,
         dst_config: ChainConfig,
@@ -467,6 +474,13 @@ pub trait ChainHandle: Clone + Send + Sync + Serialize + Debug {
     ) -> Result<(AnyConsensusState, MerkleProof), Error>;
 
     fn build_header(
+        &self,
+        trusted_height: Height,
+        target_height: Height,
+        client_state: AnyClientState,
+    ) -> Result<(AnyHeader, Vec<AnyHeader>), Error>;
+
+    fn build_header_for_genesis_restart(
         &self,
         trusted_height: Height,
         target_height: Height,

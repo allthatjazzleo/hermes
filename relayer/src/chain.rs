@@ -341,6 +341,15 @@ pub trait ChainEndpoint: Sized {
         light_client: &mut Self::LightClient,
     ) -> Result<(Self::Header, Vec<Self::Header>), Error>;
 
+    // for genesis restart
+    fn build_header_for_genesis_restart(
+        &self,
+        trusted_height: ICSHeight,
+        target_height: ICSHeight,
+        client_state: &AnyClientState,
+        light_client: &mut Self::LightClient,
+    ) -> Result<(Self::Header, Vec<Self::Header>), Error>;
+
     /// Builds the required proofs and the client state for connection handshake messages.
     /// The proofs and client state must be obtained from queries at same height.
     fn build_connection_proofs_and_client_state(

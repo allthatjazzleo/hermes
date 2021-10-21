@@ -1884,6 +1884,22 @@ impl ChainEndpoint for CosmosSdkChain {
 
         Ok((target, supporting))
     }
+
+    fn build_header_for_genesis_restart(
+        &self,
+        trusted_height: ICSHeight,
+        target_height: ICSHeight,
+        client_state: &AnyClientState,
+        light_client: &mut Self::LightClient,
+    ) -> Result<(Self::Header, Vec<Self::Header>), Error> {
+        crate::time!("build_header");
+
+        // Get the light block at target_height from chain.
+        let Verified { target, supporting } =
+            light_client.header_and_minimal_set_for_genesis_restart(trusted_height, target_height, client_state)?;
+
+        Ok((target, supporting))
+    }
 }
 
 fn packet_query(request: &QueryPacketEventDataRequest, seq: Sequence) -> Query {

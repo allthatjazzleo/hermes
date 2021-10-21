@@ -320,6 +320,20 @@ impl ChainHandle for ProdChainHandle {
         })
     }
 
+    fn build_header_for_genesis_restart(
+        &self,
+        trusted_height: Height,
+        target_height: Height,
+        client_state: AnyClientState,
+    ) -> Result<(AnyHeader, Vec<AnyHeader>), Error> {
+        self.send(|reply_to| ChainRequest::BuildHeaderForGenesisRestart {
+            trusted_height,
+            target_height,
+            client_state,
+            reply_to,
+        })
+    }
+
     fn build_client_state(
         &self,
         height: Height,
