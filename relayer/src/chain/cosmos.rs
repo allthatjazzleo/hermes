@@ -404,6 +404,8 @@ impl CosmosSdkChain {
     /// The actual gas cost, when a transaction is executed, may be slightly higher than the
     /// one returned by the simulation.
     fn apply_adjustment_to_gas(&self, gas_amount: u64) -> u64 {
+        debug!("gas adjustment: {:?}", self.gas_adjustment());
+        debug!("max gas: {:?}", self.max_gas());
         min(
             gas_amount + mul_ceil(gas_amount, self.gas_adjustment()),
             self.max_gas(),
@@ -586,8 +588,9 @@ impl CosmosSdkChain {
     }
 
     fn fee_with_gas(&self, gas_limit: u64) -> Fee {
+        debug!("gas limit {:?}", gas_limit);
         let adjusted_gas_limit = self.apply_adjustment_to_gas(gas_limit);
-
+        debug!("adjusted gas limit: {:?}", adjusted_gas_limit);
         Fee {
             amount: vec![self.fee_from_gas_in_coins(adjusted_gas_limit)],
             gas_limit: adjusted_gas_limit,
@@ -2283,6 +2286,7 @@ impl fmt::Display for PrettyFee<'_> {
 }
 
 fn calculate_fee(adjusted_gas_amount: u64, gas_price: &GasPrice) -> Coin {
+    debug!("gas price: {:?}", gas_price);
     let fee_amount = mul_ceil(adjusted_gas_amount, gas_price.price);
 
     Coin {

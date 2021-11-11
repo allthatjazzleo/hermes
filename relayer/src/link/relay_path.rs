@@ -906,6 +906,10 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
                 self
             );
         } else {
+            if events_result.len() > 20 {
+                events_result = events_result[0..20].to_vec();
+            }
+
             let mut packet_sequences = vec![];
             for event in events_result.iter() {
                 match event {
@@ -940,6 +944,8 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
 
         let src_channel_id = self.src_channel_id();
         let dst_channel_id = self.dst_channel_id();
+        debug!("src_channel_id: {:?}", src_channel_id);
+        debug!("dst_channel_id: {:?}", dst_channel_id);
 
         let (acked_sequences, sequences, src_response_height) =
             unreceived_acknowledgements_sequences(
@@ -953,11 +959,18 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             .map_err(LinkError::supervisor)?;
 
         let query_height = opt_query_height.unwrap_or(src_response_height);
-
+        debug!("src_response_height: {:?}", src_response_height);
         let sequences: Vec<Sequence> = sequences.into_iter().map(From::from).collect();
+
+        debug!("src_response_height: {:?}", src_response_height);
+        debug!("opt_query_height: {:?}", opt_query_height);
+        debug!("query_height: {:?}", query_height);
+        debug!("sequences: {:?}", sequences);
+
         if sequences.is_empty() {
             return Ok((events_result, query_height));
         }
+
 
         debug!(
             "[{}] packets that have acknowledgments on {}: [{:?}..{:?}] (total={})",
@@ -968,6 +981,8 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             acked_sequences.len()
         );
 
+
+
         debug!(
             "[{}] ack packets to send out to {} of the ones with acknowledgments on {}: {} (first 10 shown here; total={})",
             self,
@@ -975,6 +990,19 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             self.src_chain().id(),
             sequences.iter().take(10).join(", "), sequences.len()
         );
+
+        let request = QueryTxRequest::Packet(QueryPacketEventDataRequest {
+            event_id: WithBlockDataType::WriteAck,
+            source_port_id: self.dst_port_id().clone(),
+            source_channel_id: dst_channel_id.clone(),
+            destination_port_id: self.src_port_id().clone(),
+            destination_channel_id: src_channel_id.clone(),
+            sequences: sequences.clone(),
+            height: query_height.clone(),
+        });
+        debug!("request: {:?}", request);
+
+        // let hardcode_height = Height::new(9741, 1);
 
         events_result = self
             .src_chain()
@@ -988,6 +1016,8 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
                 height: query_height,
             }))
             .map_err(|e| LinkError::query(self.src_chain().id(), e))?;
+
+        debug!("events_result: {:?}", events_result);
 
         if events_result.is_empty() {
             info!(
