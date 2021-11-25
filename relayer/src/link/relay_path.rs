@@ -840,8 +840,8 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
         if sequences.is_empty() {
             return Ok((events_result, query_height));
         }
-        if sequences.len() > 100 {
-            sequences = sequences[0..100].to_vec();
+        if sequences.len() > 199 {
+            sequences = sequences[0..199].to_vec();
         }
         debug!(
             "[{}] packet seq. that still have commitments on {}: {} (first 10 shown here; total={})",
@@ -908,8 +908,8 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
                 self
             );
         } else {
-            if events_result.len() > 100 {
-                events_result = events_result[0..100].to_vec();
+            if events_result.len() > 99 {
+                events_result = events_result[0..99].to_vec();
             }
 
             let mut packet_sequences = vec![];
@@ -962,8 +962,10 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
 
         let query_height = opt_query_height.unwrap_or(src_response_height);
         debug!("src_response_height: {:?}", src_response_height);
-        let sequences: Vec<Sequence> = sequences.into_iter().map(From::from).collect();
-
+        let mut sequences: Vec<Sequence> = sequences.into_iter().map(From::from).collect();
+        if sequences.len() > 99 {
+            sequences = sequences[0..99].to_vec();
+        }
         debug!("src_response_height: {:?}", src_response_height);
         debug!("opt_query_height: {:?}", opt_query_height);
         debug!("query_height: {:?}", query_height);
@@ -1027,6 +1029,9 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
                 self
             );
         } else {
+            if events_result.len() > 99 {
+                events_result = events_result[0..99].to_vec();
+            }
             let mut packet_sequences = vec![];
             for event in events_result.iter() {
                 match event {
