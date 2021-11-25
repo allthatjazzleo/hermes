@@ -218,18 +218,18 @@ where
     fn run(mut self) -> Result<(), Error> {
         loop {
             channel::select! {
-                recv(self.event_monitor_ctrl.recv()) -> event_batch => {
-                    match event_batch {
-                        Ok(event_batch) => {
-                            self.event_bus
-                                .broadcast(Arc::new(event_batch));
-                        },
-                        Err(e) => {
-                            error!("received error via event bus: {}", e);
-                            return Err(Error::channel_receive(e));
-                        },
-                    }
-                },
+                // recv(self.event_receiver) -> event_batch => {
+                //     match event_batch {
+                //         Ok(event_batch) => {
+                //             self.event_bus
+                //                 .broadcast(Arc::new(event_batch));
+                //         },
+                //         Err(e) => {
+                //             error!("received error via event bus: {}", e);
+                //             return Err(Error::channel_receive(e));
+                //         },
+                //     }
+                // },
                 recv(self.request_receiver) -> event => {
                     match event {
                         Ok(ChainRequest::Shutdown { reply_to }) => {

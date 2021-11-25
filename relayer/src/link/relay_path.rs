@@ -2,6 +2,7 @@ use alloc::collections::BTreeMap as HashMap;
 use alloc::collections::VecDeque;
 use std::thread;
 use std::time::Instant;
+use std::env;
 
 use ibc_proto::google::protobuf::Any;
 use itertools::Itertools;
@@ -815,11 +816,20 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
 
         let query_height = opt_query_height.unwrap_or(src_response_height);
 
-        let sequences: Vec<Sequence> = sequences.into_iter().map(From::from).collect();
+        let mut sequences: Vec<Sequence> = sequences.into_iter().map(From::from).collect();
         if sequences.is_empty() {
             return Ok((events_result.into(), query_height));
         }
-
+        let reverse = match env::var_os("REVERSE") {
+            Some(_) => true,
+            None => false
+        };
+        if sequences.len() > 30 {
+            if reverse {
+                sequences.reverse();
+            }
+            sequences = sequences[0..30].to_vec();
+        }
         debug!(
             "packet seq. that still have commitments on {}: {} (first 10 shown here; total={})",
             self.src_chain().id(),
@@ -927,7 +937,17 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
 
         let query_height = opt_query_height.unwrap_or(src_response_height);
 
-        let sequences: Vec<Sequence> = unreceived_acks_by_dst.into_iter().map(From::from).collect();
+        let mut sequences: Vec<Sequence> = unreceived_acks_by_dst.into_iter().map(From::from).collect();
+        let reverse = match env::var_os("REVERSE") {
+            Some(_) => true,
+            None => false
+        };
+        if sequences.len() > 30 {
+            if reverse {
+                sequences.reverse();
+            }
+            sequences = sequences[0..30].to_vec();
+        }
         if sequences.is_empty() {
             return Ok((events_result.into(), query_height));
         }

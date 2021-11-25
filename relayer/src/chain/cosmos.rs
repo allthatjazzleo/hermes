@@ -1010,16 +1010,16 @@ impl ChainEndpoint for CosmosSdkChain {
     ) -> Result<(EventReceiver, TxMonitorCmd), Error> {
         crate::time!("init_event_monitor");
 
-        let (mut event_monitor, event_receiver, monitor_tx) = EventMonitor::new(
+        let (mut _event_monitor, event_receiver, monitor_tx) = EventMonitor::new(
             self.config.id.clone(),
             self.config.websocket_addr.clone(),
             rt,
         )
         .map_err(Error::event_monitor)?;
 
-        event_monitor.subscribe().map_err(Error::event_monitor)?;
+        // event_monitor.subscribe().map_err(Error::event_monitor)?;
 
-        thread::spawn(move || event_monitor.run());
+        // thread::spawn(move || event_monitor.run());
 
         Ok((event_receiver, monitor_tx))
     }
@@ -1795,6 +1795,7 @@ impl ChainEndpoint for CosmosSdkChain {
                 let mut result: Vec<IbcEvent> = vec![];
 
                 for seq in &request.sequences {
+                    debug!("finding sequence {}", *seq);
                     // query first (and only) Tx that includes the event specified in the query request
                     let response = self
                         .block_on(self.rpc_client.tx_search(
