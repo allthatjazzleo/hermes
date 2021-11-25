@@ -4,6 +4,7 @@ use core::cell::RefCell;
 use core::fmt;
 use std::thread;
 use std::time::Instant;
+use std::env;
 
 use itertools::Itertools;
 use prost_types::Any;
@@ -840,8 +841,15 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
         if sequences.is_empty() {
             return Ok((events_result, query_height));
         }
-        if sequences.len() > 199 {
-            sequences = sequences[0..199].to_vec();
+        let reverse = match env::var_os("REVERSE") {
+            Some(_) => true,
+            None => false
+        };
+        if sequences.len() > 99 {
+            if reverse {
+                sequences.reverse();
+            }
+            sequences = sequences[0..99].to_vec();
         }
         debug!(
             "[{}] packet seq. that still have commitments on {}: {} (first 10 shown here; total={})",
@@ -963,7 +971,14 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
         let query_height = opt_query_height.unwrap_or(src_response_height);
         debug!("src_response_height: {:?}", src_response_height);
         let mut sequences: Vec<Sequence> = sequences.into_iter().map(From::from).collect();
+        let reverse = match env::var_os("REVERSE") {
+            Some(_) => true,
+            None => false
+        };
         if sequences.len() > 99 {
+            if reverse {
+                sequences.reverse();
+            }
             sequences = sequences[0..99].to_vec();
         }
         debug!("src_response_height: {:?}", src_response_height);
