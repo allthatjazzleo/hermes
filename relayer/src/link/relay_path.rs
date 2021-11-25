@@ -836,11 +836,13 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
 
         let query_height = opt_query_height.unwrap_or(src_response_height);
 
-        let sequences: Vec<Sequence> = sequences.into_iter().map(From::from).collect();
+        let mut sequences: Vec<Sequence> = sequences.into_iter().map(From::from).collect();
         if sequences.is_empty() {
             return Ok((events_result, query_height));
         }
-
+        if sequences.len() > 100 {
+            sequences = sequences[0..100].to_vec();
+        }
         debug!(
             "[{}] packet seq. that still have commitments on {}: {} (first 10 shown here; total={})",
             self,
@@ -856,7 +858,7 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             self.src_chain().id(),
             sequences.iter().take(10).join(", "), sequences.len()
         );
-
+        debug!("{}", query_height);
         let mut query = QueryPacketEventDataRequest {
             event_id: WithBlockDataType::SendPacket,
             source_port_id: self.src_port_id().clone(),
@@ -906,8 +908,8 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
                 self
             );
         } else {
-            if events_result.len() > 20 {
-                events_result = events_result[0..20].to_vec();
+            if events_result.len() > 100 {
+                events_result = events_result[0..100].to_vec();
             }
 
             let mut packet_sequences = vec![];

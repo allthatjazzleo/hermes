@@ -812,9 +812,9 @@ impl ChainEndpoint for CosmosSdkChain {
         )
         .map_err(Error::event_monitor)?;
 
-        event_monitor.subscribe().map_err(Error::event_monitor)?;
+        // event_monitor.subscribe().map_err(Error::event_monitor)?;
 
-        thread::spawn(move || event_monitor.run());
+        // thread::spawn(move || event_monitor.run());
 
         Ok((event_receiver, monitor_tx))
     }
@@ -1554,12 +1554,13 @@ impl ChainEndpoint for CosmosSdkChain {
         crate::time!("query_txs");
 
         match request {
-            QueryTxRequest::Packet(request) => {
+            QueryTxRequest::Packet(mut request) => {
                 crate::time!("query_txs: query packet events");
 
                 let mut result: Vec<IbcEvent> = vec![];
 
                 for seq in &request.sequences {
+                    debug!("finding sequence {}", *seq);
                     // query first (and only) Tx that includes the event specified in the query request
                     let response = self
                         .block_on(self.rpc_client.tx_search(
