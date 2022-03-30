@@ -826,7 +826,7 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
         };
         if sequences.len() > 30 {
             if reverse {
-                if (sequences.len() > (sequences.len())/2+30) {
+                if sequences.len() > (sequences.len())/2+30 {
                     sequences = sequences[sequences.len()/2..].to_vec();
                 } else {
                     return Ok((events_result.into(), query_height));
@@ -948,7 +948,7 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
         };
         if sequences.len() > 30 {
             if reverse {
-                if (sequences.len() > (sequences.len())/2+30) {
+                if sequences.len() > (sequences.len())/2+30 {
                     sequences = sequences[sequences.len()/2..].to_vec();
                 } else {
                     return Ok((events_result.into(), query_height));
