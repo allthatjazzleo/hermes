@@ -825,7 +825,7 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             None => false
         };
         let sequence_limit = match env::var_os("SEQUENCE_LIMIT") {
-            Some(x) => x.parse::<usize>().unwrap(),
+            Some(x) => x.into_string().ok()?.parse::<usize>()?,
             None => 30
         };
 
@@ -956,7 +956,7 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             None => false
         };
         let sequence_limit = match env::var_os("SEQUENCE_LIMIT") {
-            Some(x) => x.parse::<usize>().unwrap(),
+            Some(x) => x.into_string().ok()?.parse::<usize>()?,
             None => 30
         };
 
