@@ -825,9 +825,12 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             None => false
         };
         if sequences.len() > 30 {
-            debug!("{} {}", sequences.len(), sequences.len()/2+30);
-            if reverse && (sequences.len() > (sequences.len())/2+30) {
-                sequences = sequences[sequences.len()/2..].to_vec();
+            if reverse {
+                if (sequences.len() > (sequences.len())/2+30) {
+                    sequences = sequences[sequences.len()/2..].to_vec();
+                } else {
+                    return Ok((events_result.into(), query_height));
+                }
             }
             sequences = sequences[0..30].to_vec();
         }
@@ -944,9 +947,12 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             None => false
         };
         if sequences.len() > 30 {
-            debug!("{} {}", sequences.len(), sequences.len()/2+30);
-            if reverse && (sequences.len() > (sequences.len())/2+30) {
-                sequences = sequences[sequences.len()/2..].to_vec();
+            if reverse {
+                if (sequences.len() > (sequences.len())/2+30) {
+                    sequences = sequences[sequences.len()/2..].to_vec();
+                } else {
+                    return Ok((events_result.into(), query_height));
+                }
             }
             sequences = sequences[0..30].to_vec();
         }
