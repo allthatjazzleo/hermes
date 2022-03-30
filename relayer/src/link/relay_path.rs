@@ -824,15 +824,20 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             Some(_) => true,
             None => false
         };
-        if sequences.len() > 30 {
+        let sequence_limit = match env::var_os("SEQUENCE_LIMIT") {
+            Some(x) => x.parse::<usize>().unwrap(),
+            None => 30
+        };
+
+        if sequences.len() > sequence_limit {
             if reverse {
-                if sequences.len() > (sequences.len())/2+30 {
+                if sequences.len() > (sequences.len())/2+sequence_limit {
                     sequences = sequences[sequences.len()/2..].to_vec();
                 } else {
                     return Ok((events_result.into(), query_height));
                 }
             }
-            sequences = sequences[0..30].to_vec();
+            sequences = sequences[0..sequence_limit].to_vec();
         } else {
             if reverse {
                 return Ok((events_result.into(), query_height));
@@ -950,15 +955,20 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             Some(_) => true,
             None => false
         };
-        if sequences.len() > 30 {
+        let sequence_limit = match env::var_os("SEQUENCE_LIMIT") {
+            Some(x) => x.parse::<usize>().unwrap(),
+            None => 30
+        };
+
+        if sequences.len() > sequence_limit {
             if reverse {
-                if sequences.len() > (sequences.len())/2+30 {
+                if sequences.len() > (sequences.len())/2+sequence_limit {
                     sequences = sequences[sequences.len()/2..].to_vec();
                 } else {
                     return Ok((events_result.into(), query_height));
                 }
             }
-            sequences = sequences[0..30].to_vec();
+            sequences = sequences[0..sequence_limit].to_vec();
         } else {
             if reverse {
                 return Ok((events_result.into(), query_height));
