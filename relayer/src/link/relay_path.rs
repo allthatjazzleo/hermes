@@ -833,6 +833,10 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
                 }
             }
             sequences = sequences[0..30].to_vec();
+        } else {
+            if reverse {
+                return Ok((events_result.into(), query_height));
+            }
         }
         debug!(
             "packet seq. that still have commitments on {}: {} (first 10 shown here; total={})",
@@ -955,7 +959,12 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
                 }
             }
             sequences = sequences[0..30].to_vec();
+        } else {
+            if reverse {
+                return Ok((events_result.into(), query_height));
+            }
         }
+
         if sequences.is_empty() {
             return Ok((events_result.into(), query_height));
         }
