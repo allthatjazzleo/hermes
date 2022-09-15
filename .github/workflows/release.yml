@@ -31,7 +31,8 @@ jobs:
       - name: Install OpenSSL
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            apt install pkg-config libssl-dev
+            sudo apt-get update
+            sudo apt-get install pkg-config libssl-dev
           elif [ "$RUNNER_OS" == "macOS" ]; then
             brew install openssl@1.1
           else
