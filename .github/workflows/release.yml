@@ -28,6 +28,17 @@ jobs:
     runs-on: ${{ matrix.config.os }}
     steps:
       - uses: actions/checkout@v2
+      - name: Install OpenSSL
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            apt install pkg-config libssl-dev
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            brew install openssl@1.1
+          else
+            echo "$RUNNER_OS not supported"
+            exit 1
+          fi
+        shell: bash
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required)
