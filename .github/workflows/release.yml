@@ -32,8 +32,8 @@ jobs:
       - name: Install cross-compilation tools
         uses: taiki-e/setup-cross-toolchain-action@v1
         with:
-          target: ${{ matrix.target }}
-        if: startsWith(matrix.os, 'ubuntu')
+          target: ${{ matrix.config.target }}
+        if: startsWith(matrix.config.os, 'ubuntu')
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required)
