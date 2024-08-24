@@ -107,6 +107,7 @@ use crate::light_client::tendermint::LightClient as TmLightClient;
 use crate::light_client::{LightClient, Verified};
 use crate::misbehaviour::MisbehaviourEvidence;
 use crate::util::compat_mode::compat_mode_from_version;
+use crate::util::create_grpc_client;
 use crate::util::pretty::PrettySlice;
 use crate::util::pretty::{
     PrettyIdentifiedChannel, PrettyIdentifiedClientState, PrettyIdentifiedConnection,
@@ -374,13 +375,10 @@ impl CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_ccv_consumer_chain_params");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::interchain_security::ccv::consumer::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone()
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::interchain_security::ccv::consumer::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -411,13 +409,10 @@ impl CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_staking_params");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::cosmos::staking::v1beta1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::cosmos::staking::v1beta1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -1301,13 +1296,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_clients");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::client::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::ibc::core::client::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -1492,13 +1484,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_client_connections");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::connection::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::ibc::core::connection::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -1538,13 +1527,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_connections");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::connection::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::ibc::core::connection::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -1596,10 +1582,11 @@ impl ChainEndpoint for CosmosSdkChain {
             use ibc_proto::ibc::core::connection::v1 as connection;
             use tonic::IntoRequest;
 
-            let mut client =
-                connection::query_client::QueryClient::connect(chain.grpc_addr.clone())
-                    .await
-                    .map_err(Error::grpc_transport)?;
+            let mut client = create_grpc_client(
+                chain.grpc_addr.clone(),
+                connection::query_client::QueryClient::new,
+            )
+            .await?;
 
             client = client.max_decoding_message_size(
                 chain.config().max_grpc_decoding_size.get_bytes() as usize,
@@ -1677,13 +1664,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_connection_channels");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::ibc::core::channel::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -1749,13 +1733,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_channels");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::ibc::core::channel::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -1873,13 +1854,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_channel_client_state");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::ibc::core::channel::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -1944,17 +1922,15 @@ impl ChainEndpoint for CosmosSdkChain {
         crate::telemetry!(query, self.id(), "query_packet_commitments");
 
         let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
+            .block_on(create_grpc_client(
+                self.grpc_addr.clone(),
+                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::new,
+            ))
             .map(|client| {
                 client.max_decoding_message_size(
                     self.config().max_grpc_decoding_size.get_bytes() as usize
                 )
-            })
-            .map_err(Error::grpc_transport)?;
+            })?;
 
         if request.pagination.is_enabled() {
             let mut results = Vec::new();
@@ -2106,13 +2082,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_unreceived_packets");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::ibc::core::channel::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -2182,17 +2155,15 @@ impl ChainEndpoint for CosmosSdkChain {
         }
 
         let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
+            .block_on(create_grpc_client(
+                self.grpc_addr.clone(),
+                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::new,
+            ))
             .map(|client| {
                 client.max_decoding_message_size(
                     self.config().max_grpc_decoding_size.get_bytes() as usize
                 )
-            })
-            .map_err(Error::grpc_transport)?;
+            })?;
 
         if request.pagination.is_enabled() {
             let mut results = Vec::new();
@@ -2302,13 +2273,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_unreceived_acknowledgements");
 
-        let mut client = self
-            .block_on(
-                ibc_proto::ibc::core::channel::v1::query_client::QueryClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::ibc::core::channel::v1::query_client::QueryClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -2643,12 +2611,10 @@ impl ChainEndpoint for CosmosSdkChain {
         );
         crate::telemetry!(query, self.id(), "query_consumer_chains");
 
-        let mut client = self.block_on(
-            ibc_proto::interchain_security::ccv::provider::v1::query_client::QueryClient::connect(
-                self.grpc_addr.clone(),
-            ),
-        )
-        .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::interchain_security::ccv::provider::v1::query_client::QueryClient::new,
+        ))?;
 
         let request = tonic::Request::new(
             ibc_proto::interchain_security::ccv::provider::v1::QueryConsumerChainsRequest {},
