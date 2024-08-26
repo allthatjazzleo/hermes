@@ -76,6 +76,9 @@ jobs:
 
   docker-merge:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     needs:
       - docker-build
     steps:
