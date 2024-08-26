@@ -96,7 +96,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY_IMAGE }}
+          images: ghcr.io/${{ env.REGISTRY_IMAGE }}
           tags: |
             type=ref,event=tag
             type=ref,event=branch
@@ -113,4 +113,4 @@ jobs:
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create --tag ghcr.io/${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }} \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+            $(printf 'ghcr.io/${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
