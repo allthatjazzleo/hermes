@@ -13,6 +13,7 @@ use tendermint_rpc::{Client, HttpClient, Url};
 use crate::chain::cosmos::version::Specs;
 use crate::chain::requests::{QueryClientEventRequest, QueryPacketEventDataRequest, QueryTxHash};
 use crate::error::Error;
+use crate::util::create_grpc_client;
 
 pub mod account;
 pub mod balance;
@@ -125,14 +126,13 @@ pub async fn fetch_version_specs(chain_id: &ChainId, grpc_address: &Uri) -> Resu
     let grpc_addr_string = grpc_address.to_string();
 
     // Construct a gRPC client
-    let mut client = ServiceClient::connect(grpc_address.clone())
+    let mut client = create_grpc_client(grpc_address.clone(), ServiceClient::new)
         .await
-        .map_err(|e| {
+        .map_err(|_e| {
             Error::fetch_version_grpc_transport(
                 chain_id.clone(),
                 grpc_addr_string.clone(),
                 "tendermint::ServiceClient".to_string(),
-                e,
             )
         })?;
 

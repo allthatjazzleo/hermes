@@ -461,13 +461,10 @@ impl CosmosSdkChain {
                 .contains("unknown service cosmos.base.node.v1beta1.Service")
         }
 
-        let mut client = self
-            .block_on(
-                ibc_proto::cosmos::base::node::v1beta1::service_client::ServiceClient::connect(
-                    self.grpc_addr.clone(),
-                ),
-            )
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ibc_proto::cosmos::base::node::v1beta1::service_client::ServiceClient::new,
+        ))?;
 
         client = client
             .max_decoding_message_size(self.config().max_grpc_decoding_size.get_bytes() as usize);
@@ -675,9 +672,10 @@ impl CosmosSdkChain {
         let grpc_addr = self.grpc_addr.clone();
         let grpc_addr_string = grpc_addr.to_string();
 
-        let mut client = self
-            .block_on(ServiceClient::connect(grpc_addr.clone()))
-            .map_err(Error::grpc_transport)?;
+        let mut client = self.block_on(create_grpc_client(
+            self.grpc_addr.clone(),
+            ServiceClient::new,
+        ))?;
 
         let request = tonic::Request::new(GetSyncingRequest {});
 
